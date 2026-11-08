@@ -91,6 +91,8 @@ export function initHeroCarousel() {
   // Video decoding is expensive: only cards that are actually on screen are
   // allowed to play. Everything else stays on its poster frame.
   let heroVisible = true;
+  let pageScrolling = false;
+  let scrollEndTimer = 0;
   const heroVideos = Array.from(carouselWrap.querySelectorAll('video'));
   const onScreen = new Map();
 
@@ -101,7 +103,7 @@ export function initHeroCarousel() {
 
   const syncVideos = () => {
     heroVideos.forEach((video) => {
-      if (heroVisible && !document.hidden && onScreen.get(video)) playVideo(video);
+      if (heroVisible && !document.hidden && !pageScrolling && onScreen.get(video)) playVideo(video);
       else video.pause();
     });
   };
@@ -120,6 +122,22 @@ export function initHeroCarousel() {
   }
 
   document.addEventListener('visibilitychange', syncVideos);
+
+  // Decorative video and carousel layout must not compete with the page scroll.
+  // Freeze both while the document is moving, then resume when it settles.
+  window.addEventListener('scroll', () => {
+    if (!pageScrolling) {
+      pageScrolling = true;
+      needsRender = true;
+      syncVideos();
+    }
+    window.clearTimeout(scrollEndTimer);
+    scrollEndTimer = window.setTimeout(() => {
+      pageScrolling = false;
+      needsRender = true;
+      syncVideos();
+    }, 140);
+  }, { passive: true });
 
   // Carousel physics & motion. All timing is seconds, supplied by the loop.
   let scrollOffset = 0;
@@ -200,9 +218,22 @@ export function initHeroCarousel() {
     needsRender = false;
   }
 
+  // The gentle idle drift only needs 30fps; drags still run at display refresh.
+  // That halves the number of card layout/clip-path writes while the carousel
+  // is moving on its own, with no visible difference at its slow base speed.
+  let renderClock = 0;
   function update(dt) {
-    if (!heroVisible) return;
-    updateCarousel(dt);
+    if (!heroVisible || pageScrolling) return;
+    if (!isDragging) {
+      renderClock += dt;
+      if (renderClock < 1 / 30) return;
+      const step = Math.min(renderClock, 0.064);
+      renderClock = 0;
+      updateCarousel(step);
+    } else {
+      renderClock = 0;
+      updateCarousel(dt);
+    }
   }
 
   // Pointer events for drag.

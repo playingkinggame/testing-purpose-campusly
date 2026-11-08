@@ -50,6 +50,8 @@ export class FrameSequence {
     this.lastPosition = 0;
     this.direction = 1;
     this.lastDrawn = -1;
+    this.lastPrefetchAt = 0;
+    this.lastPrefetchCenter = -1;
     this.frameZeroDrawn = false;
 
     this.controller = new AbortController();
@@ -176,6 +178,12 @@ export class FrameSequence {
 
   prefetch(position) {
     const center = Math.round(position);
+    const now = performance.now();
+    // draw() runs at display rate; prefetch does not need to. One pass every
+    // few frames (or when the scrub jumps) is enough to keep decoding fed.
+    if (now - this.lastPrefetchAt < 70 && Math.abs(center - this.lastPrefetchCenter) < 3) return;
+    this.lastPrefetchAt = now;
+    this.lastPrefetchCenter = center;
     const ahead = this.direction >= 0 ? this.prefetchAhead : this.prefetchBehind;
     const behind = this.direction >= 0 ? this.prefetchBehind : this.prefetchAhead;
     for (let d = 0; d <= ahead; d++) this.ensureFrame(center + d);

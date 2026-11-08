@@ -57,6 +57,12 @@ export function initStoryScroll({ onProgress } = {}) {
   }));
 
   const storyCtx = storyCanvas.getContext('2d');
+  if (storyCtx) {
+    storyCtx.imageSmoothingEnabled = true;
+    // These frames are background photography, not UI text. Low smoothing is
+    // visually identical at this scale and cheaper to composite each frame.
+    storyCtx.imageSmoothingQuality = 'low';
+  }
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const useSmallFrames = window.innerWidth <= 820
     || (typeof navigator.deviceMemory === 'number' && navigator.deviceMemory <= 4)
@@ -187,6 +193,15 @@ export function initStoryScroll({ onProgress } = {}) {
   let lastScore = -1;
   let statsStartedAt = -1;
   let statsDone = false;
+  let lastCamStyle = '';
+  let lastPlateState = '';
+  let lastFogVisible = false;
+  let lastFogState = '';
+  let lastHudVisible = true;
+  let lastProg = '';
+  let lastCanvasPosition = -1;
+  let lastDrawAt = 0;
+  let lastStatsAt = 0;
 
   window.addEventListener('pointermove', (e) => {
     mx = (e.clientX / window.innerWidth) - 0.5;
@@ -221,7 +236,10 @@ export function initStoryScroll({ onProgress } = {}) {
       }
     }, { rootMargin: '0px', threshold: 0 });
     storySec.classList.add('is-idle');
-    activeObserver.observe(storySec);
+    // Observe the track, not the whole section: the Solutions panel continues
+    // below it, and the canvas must stop painting once the pinned stage has
+    // scrolled away instead of drawing behind that panel.
+    activeObserver.observe(storyTrack);
   } else {
     active = true;
   }
@@ -240,6 +258,10 @@ export function initStoryScroll({ onProgress } = {}) {
       if (window.scrollY < statsTriggerY) return;
       statsStartedAt = now;
     }
+    // Four 44px numbers changing width at 120Hz is more layout/paint than the
+    // count-up needs; 30 updates a second still reads as a continuous count.
+    if (now - lastStatsAt < 33) return;
+    lastStatsAt = now;
     const progress = Math.min((now - statsStartedAt) / 1600, 1);
     const eased = easeInOut(progress);
     stats.forEach((stat) => {
@@ -255,7 +277,7 @@ export function initStoryScroll({ onProgress } = {}) {
 
     // Progress is a pure function of scroll position and cached measurements.
     const rawP = readProgress();
-    sp += (rawP - sp) * (1 - Math.exp(-dt * 9));
+    sp += (rawP - sp) * (1 - Math.exp(-dt * 12));
     if (Math.abs(rawP - sp) < 0.0002) sp = rawP;
 
     // Pointer parallax, damped with a time constant instead of 0.06 per frame.
@@ -270,13 +292,28 @@ export function initStoryScroll({ onProgress } = {}) {
 
     const vp = easeInOut(seg(sp, 0.05, 0.70));
     wantPosition = vp * Math.max(0, sequence.count - 1);
-    sequence.draw(storyCtx, wantPosition);
+    // While the story is moving, paint every frame. Once it is stationary,
+    // only repaint occasionally to pick up newly decoded frames; a full-screen
+    // canvas does not need to repaint 60 times a second while nobody moves.
+    // The frames themselves are a 60fps sequence; painting them at 120Hz on a
+    // high-refresh display only doubles compositor work. The camera still
+    // updates every display frame, so motion stays smooth.
+    const canvasDue = Math.abs(wantPosition - lastCanvasPosition) > 0.0001 && now - lastDrawAt > 15;
+    if (canvasDue || now - lastDrawAt > 120) {
+      sequence.draw(storyCtx, wantPosition);
+      lastCanvasPosition = wantPosition;
+      lastDrawAt = now;
+    }
 
     if (!reduceMotion) {
       const camY = -sy * 12 + (1 - vp) * viewportH * 0.06;
       const camScale = 1 + 0.02 * (1 - vp);
-      storyCam.style.transform = `translate3d(${-sx * 18}px, ${camY}px, 0) scale(${camScale})`;
-      storyCamF.style.transform = `translate3d(${-sx * 18}px, ${camY}px, 0) scale(${camScale})`;
+      const camStyle = `translate3d(${-sx * 18}px, ${camY}px, 0) scale(${camScale})`;
+      if (camStyle !== lastCamStyle) {
+        storyCam.style.transform = camStyle;
+        storyCamF.style.transform = camStyle;
+        lastCamStyle = camStyle;
+      }
     }
 
     // Hand-off from the still poster plate to the first real frame.
@@ -288,9 +325,13 @@ export function initStoryScroll({ onProgress } = {}) {
     }
     if (Math.abs(handoffTarget - plateAlpha) < 0.002) plateAlpha = handoffTarget;
 
-    storyPlate.style.opacity = String(1 - plateAlpha);
-    storyCamF.style.opacity = String(1 - plateAlpha);
-    storyCamF.style.visibility = plateAlpha > 0.999 ? 'hidden' : 'visible';
+    const plateState = `${plateAlpha.toFixed(4)}|${handoffTarget}`;
+    if (plateState !== lastPlateState) {
+      storyPlate.style.opacity = String(1 - plateAlpha);
+      storyCamF.style.opacity = String(1 - plateAlpha);
+      storyCamF.style.visibility = plateAlpha > 0.999 ? 'hidden' : 'visible';
+      lastPlateState = plateState;
+    }
 
     // Floating rocks. No per-frame blur: the scale + travel already sells depth.
     if (reduceMotion) {
@@ -310,9 +351,22 @@ export function initStoryScroll({ onProgress } = {}) {
 
     // Fog bank.
     const fg = easeInOut(seg(sp, 0.38, 0.47));
-    storyFog.style.visibility = fg > 0 ? 'visible' : 'hidden';
-    storyFog.style.opacity = fg;
-    storyFog.style.transform = `translate3d(${(fg - 1) * 18 - sx * 10}vw, ${sy * -6}px, 0)`;
+    if (fg > 0) {
+      if (!lastFogVisible) {
+        storyFog.style.visibility = 'visible';
+        lastFogVisible = true;
+      }
+      const fogTransform = `translate3d(${(fg - 1) * 18 - sx * 10}vw, ${sy * -6}px, 0)`;
+      const fogState = `${fg.toFixed(4)}|${fogTransform}`;
+      if (fogState !== lastFogState) {
+        storyFog.style.opacity = String(fg);
+        storyFog.style.transform = fogTransform;
+        lastFogState = fogState;
+      }
+    } else if (lastFogVisible) {
+      storyFog.style.visibility = 'hidden';
+      lastFogVisible = false;
+    }
 
     // Beat 1: hero copy and HUD.
     const h = seg(sp, 0.02, 0.1);
@@ -325,8 +379,17 @@ export function initStoryScroll({ onProgress } = {}) {
     }
 
     const hudH = 1 - seg(sp, 0.02, 0.08);
-    storyHud.style.opacity = hudH;
-    storyHud.style.transform = `translate3d(${sx * 26}px, ${sy * 18 - h * 40}px, 0)`;
+    if (hudH > 0.001) {
+      if (!lastHudVisible) {
+        storyHud.style.visibility = 'visible';
+        lastHudVisible = true;
+      }
+      storyHud.style.opacity = hudH;
+      storyHud.style.transform = `translate3d(${sx * 26}px, ${sy * 18 - h * 40}px, 0)`;
+    } else if (lastHudVisible) {
+      storyHud.style.visibility = 'hidden';
+      lastHudVisible = false;
+    }
     storyCaption.style.opacity = 1 - seg(sp, 0.01, 0.05);
     storyHint.style.opacity = 1 - seg(sp, 0.01, 0.05);
 
@@ -398,7 +461,11 @@ export function initStoryScroll({ onProgress } = {}) {
       storyFeats.style.visibility = 'hidden';
     }
 
-    storyProgBar.style.transform = `scaleX(${sp})`;
+    const prog = sp.toFixed(4);
+    if (prog !== lastProg) {
+      storyProgBar.style.transform = `scaleX(${prog})`;
+      lastProg = prog;
+    }
   }
 
   // Play the headline "rise" when the scene actually scrolls into view.
@@ -414,5 +481,5 @@ export function initStoryScroll({ onProgress } = {}) {
     storySec.classList.add('in-view');
   }
 
-  return { sequence, update, redraw };
+  return { sequence, update, redraw, startSequence };
 }

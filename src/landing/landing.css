@@ -1399,6 +1399,18 @@
       }
       [data-magnetic]:hover { will-change: transform; }
 
+      /* While the document is moving, skip large live backdrop blurs that sit
+         over the repainting story canvas. They return as soon as the scroll
+         settles, so the glass look is unchanged at rest. */
+      html.is-scrolling .story-carbon-card,
+      html.is-scrolling .story-feats,
+      html.is-scrolling .story-hotspot-label,
+      html.is-scrolling .story-hud pre,
+      html.is-scrolling .hero-card.is-focus .hero-card-chip {
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+      }
+
       /* =====================================================
          LENIS SMOOTH SCROLL (fine pointers only)
          ===================================================== */

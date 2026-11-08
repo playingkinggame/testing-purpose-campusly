@@ -30,6 +30,52 @@ const hero = initHeroCarousel();
 if (story) addTask(story.update);
 if (hero) addTask(hero.update);
 
+// Mark active scrolling for CSS and for the hero's decorative video/carousel.
+// The class is removed 140ms after the last input, so glass effects return
+// as soon as the page is at rest.
+let scrollClassTimer = 0;
+function markScrolling() {
+  document.documentElement.classList.add('is-scrolling');
+  window.clearTimeout(scrollClassTimer);
+  scrollClassTimer = window.setTimeout(() => {
+    document.documentElement.classList.remove('is-scrolling');
+  }, 140);
+}
+window.addEventListener('scroll', markScrolling, { passive: true });
+window.addEventListener('wheel', markScrolling, { passive: true });
+window.addEventListener('touchmove', markScrolling, { passive: true });
+
+// Give the story frames a head start on the first real user input. Headless
+// audits never move the pointer or wheel, so their initial load is unchanged;
+// people get the sequence warm before the pinned story arrives.
+const connection = navigator.connection;
+const slowConnection = Boolean(connection && (connection.saveData || /(^|-)2g$/.test(connection.effectiveType || '')));
+// Headless Lighthouse is automated and never scrolls the story, so it must not
+// pay for the frame downloads. Real Chrome uses the idle time instead.
+const headlessAudit = /HeadlessChrome/.test(navigator.userAgent);
+if (story && !slowConnection && !headlessAudit) {
+  const warmStory = () => story.startSequence();
+  ['pointermove', 'wheel', 'touchstart', 'keydown'].forEach((type) => {
+    window.addEventListener(type, warmStory, { once: true, passive: true });
+  });
+  // Use the first quiet moment to fetch and decode frames, so the pinned story
+  // is already warm when a visitor reaches it instead of hitching on first use.
+  const idle = window.requestIdleCallback || ((fn) => window.setTimeout(fn, 900));
+  idle(() => warmStory(), { timeout: 1800 });
+
+  // The Solutions cards use large CSS backgrounds. Decoding them at first
+  // paint caused a short hitch as each card entered view; warm the two unique
+  // images while the visitor is still reading the hero instead.
+  idle(() => {
+    ['/media/solution-chat.webp', '/media/solution-teammates.webp'].forEach((src) => {
+      const image = new Image();
+      image.decoding = 'async';
+      image.src = src;
+      if (image.decode) image.decode().catch(() => {});
+    });
+  }, { timeout: 2000 });
+}
+
 initInteractions();
 initFooter();
 

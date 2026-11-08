@@ -14,7 +14,9 @@ export function initSmoothScroll() {
   const lenis = (!reduceMotion && finePointer)
     ? new Lenis({
         autoRaf: false,
-        lerp: 0.11,
+        // A little quicker than 0.11 keeps the page connected to the wheel
+        // while still removing the stepped feel of native wheel scrolling.
+        lerp: 0.14,
         smoothWheel: true,
         syncTouch: false,
         wheelMultiplier: 1,
