@@ -1,0 +1,9 @@
+node_modules
+dist
+.env
+.env.local
+.vercel
+*.log
+
+# Large original media used only to generate public/frames and public/media
+scripts/source/

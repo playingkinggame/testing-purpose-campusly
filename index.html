@@ -1,0 +1,487 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Campusly — Find Your People at VIT Chennai</title>
+    <meta name="description" content="Verified social and chat platform exclusively for VIT Chennai students. Connect with peers, find hackathon teammates, join clubs, and showcase campus achievements." />
+    <meta property="og:title" content="Campusly — Find Your People at VIT Chennai" />
+    <meta property="og:description" content="Verified social and chat platform exclusively for VIT Chennai students." />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="icon" type="image/svg+xml" href="/icons/icon.svg" />
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600&family=Inter+Tight:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+    <!-- Landing styles are linked here, not only imported from JS, so the very
+         first paint is already styled (no flash of unstyled content on reload). -->
+    <link rel="stylesheet" href="/src/landing/landing.css" />
+
+    <!-- Cross-document fade when moving between the landing page and the app. -->
+    <style>
+      @view-transition { navigation: auto; }
+      @media (prefers-reduced-motion: no-preference) {
+        ::view-transition-old(root) { animation: campuslyVtOut 160ms ease both; }
+        ::view-transition-new(root) { animation: campuslyVtIn 260ms cubic-bezier(0.16, 1, 0.3, 1) both; }
+      }
+      @keyframes campuslyVtOut { to { opacity: 0; } }
+      @keyframes campuslyVtIn { from { opacity: 0; } }
+    </style>
+
+    <!-- First paint: the hero carousel poster is the LCP image. The story
+         poster and frames are below the fold and must not compete with it. -->
+    <link rel="preload" as="image" href="/media/hero-grid-poster.webp" type="image/webp" fetchpriority="high" />
+  </head>
+  <body>
+
+    <!-- Boot preloader: covers the hero until the poster and first frames decode -->
+    <div class="preloader" id="preloader" role="status" aria-live="polite" aria-label="Loading Campusly">
+      <span class="preloader-mark" aria-hidden="true">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 21a9 9 0 0 0 9-9c0-4.97-4.03-9-9-9A9 9 0 0 0 3 12c0 1.61.42 3.12 1.16 4.44L3 21l4.74-1.12A8.95 8.95 0 0 0 12 21z"></path>
+          <path d="M12 8c2.2 0 4 1.8 4 4 0 2.5-3 5-4 5s-4-2.5-4-5c0-2.2 1.8-4 4-4z"></path>
+        </svg>
+      </span>
+      <span class="preloader-bar" aria-hidden="true"><span id="preloaderBar"></span></span>
+    </div>
+
+    <!-- =====================================================
+         PART A: 1. HERO SECTION (REELMARK ADAPTED TO CAMPUSLY)
+         ===================================================== -->
+    <section class="hero-sec" id="hero">
+      <div class="hero-stage">
+        <!-- Top Navigation -->
+        <header class="hero-nav">
+          <a href="#hero" class="hero-logo" aria-label="Campusly home">
+            <span class="hero-logo-mark">
+              <!-- Leaf / Chat Mark -->
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 21a9 9 0 0 0 9-9c0-4.97-4.03-9-9-9A9 9 0 0 0 3 12c0 1.61.42 3.12 1.16 4.44L3 21l4.74-1.12A8.95 8.95 0 0 0 12 21z"></path>
+                <path d="M12 8c2.2 0 4 1.8 4 4 0 2.5-3 5-4 5s-4-2.5-4-5c0-2.2 1.8-4 4-4z"></path>
+              </svg>
+            </span>
+            Campusly
+          </a>
+
+          <ul class="hero-links">
+            <li><a href="#sol">Features</a></li>
+            <li><a href="#sol">Groups</a></li>
+            <li><a href="#sol">Events</a></li>
+            <li><a href="#story">Achievements</a></li>
+            <li><a href="#footer">Contact</a></li>
+          </ul>
+
+          <button type="button" class="hero-btn-login" id="heroLoginBtn">Log in</button>
+          <button type="button" class="hero-btn-signup" id="heroSignUpBtn">Sign up</button>
+        </header>
+
+        <!-- Badge -->
+        <div class="hero-badge">Made for VIT Chennai students</div>
+
+        <!-- Headline -->
+        <h1 class="hero-headline">
+          Find Your People
+          <span class="hero-headline-line2">at VIT Chennai</span>
+        </h1>
+
+        <!-- Subline -->
+        <p class="hero-subline">
+          Verified profiles, real campus details and private chat,<br />
+          all in one place. Meet teammates, join clubs,<br />
+          and show off your wins.
+        </p>
+
+        <!-- Doodles & Notes -->
+        <div class="hero-doodle-slashes" aria-hidden="true">//</div>
+
+        <div class="hero-note-wins" aria-hidden="true">
+          Show your<br />wins
+          <svg viewBox="0 0 120 110" fill="none" stroke="#08482D" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M 20 10 C 15 45, 45 80, 95 95" />
+            <path d="M 82 92 L 95 95 L 90 82" />
+          </svg>
+        </div>
+
+        <div class="hero-note-free" aria-hidden="true">
+          Free for VIT
+          <svg viewBox="0 0 50 40" fill="none" stroke="#08482D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M 10 30 C 25 28, 38 20, 42 10" />
+            <path d="M 33 10 L 42 10 L 41 20" />
+          </svg>
+        </div>
+
+        <!-- Curved Draggable Carousel -->
+        <div class="hero-carousel-wrap" id="heroCarousel" aria-label="Campus stories and student profiles carousel">
+          <!-- Card 0 is real HTML (and the LCP image); JS reuses it and adds 9 more. -->
+          <div class="hero-card">
+            <div class="hero-card-media">
+              <img class="hero-card-poster" src="/media/hero-grid-poster.webp" alt="Reel clip" />
+              <video class="hero-card-video" src="/media/hero-grid.mp4" poster="/media/hero-grid-poster.webp" muted loop playsinline preload="none"></video>
+              <div class="hero-card-overlay"></div>
+              <div class="hero-card-play">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><polygon points="6,3 20,12 6,21"></polygon></svg>
+              </div>
+              <div class="hero-card-chip">
+                <div class="hero-chip-avatar">A</div>
+                <div class="hero-chip-info">
+                  <span class="hero-chip-name">Aarav Sharma</span>
+                  <span class="hero-chip-meta">CSE · 2nd yr</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- 9 more video cards are initialized via JavaScript -->
+        </div>
+
+        <!-- Main CTA Button -->
+        <div class="hero-cta-box">
+          <div class="hero-cta-ring"></div>
+          <button type="button" class="hero-cta-btn" id="heroMainCtaBtn" data-magnetic>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+              <polyline points="22,6 12,13 2,6"></polyline>
+            </svg>
+            Join with VIT email
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- =====================================================
+         PART A: 2. SCROLL STORY (MOSSLINE ADAPTED TO CAMPUSLY)
+         ===================================================== -->
+    <section class="story-sec" id="story">
+      <div class="story-track" id="storyTrack">
+      <div class="story-stage">
+        <!-- 1. Background Camera Box -->
+        <div class="story-cam" id="storyCam">
+          <canvas class="story-cv" id="storyCanvas"></canvas>
+          <img class="story-plate" id="storyPlate"
+               src="/media/story-poster.webp"
+               alt="Campus floating island landscape" />
+          <div class="story-mist"></div>
+        </div>
+
+        <!-- 2. Film frames are pre-extracted WebP files in /public/frames (see scripts/extract-frames.sh) -->
+
+        <!-- 3. Fog Bank -->
+        <div class="story-fog" id="storyFog">
+          <div class="story-fog-f0"></div>
+          <div class="story-fog-f1"></div>
+          <div class="story-fog-f2"></div>
+        </div>
+
+        <!-- 4. Layer L0: Hero Headline -->
+        <div class="story-layer" id="storyL0">
+          <div class="story-hero-copy" id="storyHeroCopy">
+            <span class="chip-lime">Campus intelligence</span>
+            <h1>
+              <span class="story-line-mask">
+                <span>Meet Your Campus</span>
+              </span>
+            </h1>
+          </div>
+        </div>
+
+        <!-- 5. Front Cut-out for Fern-over-Headline -->
+        <div class="story-camF" id="storyCamF">
+          <img src="/media/story-foreground.webp"
+               alt="Floating island foreground cut-out" />
+        </div>
+
+        <!-- 6. Floating Rocks -->
+        <div class="story-rock story-rk1" id="storyRk1" data-x="-0.3" data-y="-0.6" data-d="1.3">
+          <div class="bob">
+            <img src="/media/rock.webp" alt="Moss rock" />
+          </div>
+        </div>
+        <div class="story-rock story-rk3" id="storyRk3" data-x="1" data-y="0.55" data-d="1.8">
+          <div class="bob">
+            <img src="/media/rock.webp" alt="Moss rock" />
+          </div>
+        </div>
+
+        <!-- 7. Layer L1: HUD, Caption & Scroll Hint -->
+        <div class="story-layer" id="storyL1">
+          <div class="story-hud" id="storyHud">
+            <div class="story-crosshair" aria-hidden="true"></div>
+            <span class="chip-lime">Vellore Institute · Chennai</span>
+            <pre>BLOCK C
+2 NEW REQUESTS
+14 ONLINE</pre>
+          </div>
+          <div class="story-caption" id="storyCaption">
+            Real campus connections.<br />
+            Verified by VIT email.<br />
+            Built by students, for students.
+          </div>
+          <div class="story-scroll-hint" id="storyHint">
+            SCROLL TO EXPLORE
+            <span class="story-scroll-circle">↓</span>
+          </div>
+        </div>
+
+        <!-- 8. Layer L2: Vision Statement -->
+        <div class="story-layer" id="storyL2">
+          <div class="story-vision" id="storyVision">
+            <span class="chip-lime">Why Campusly</span>
+            <h2 id="storyVisionH2">
+              <span class="word">From</span> <span class="word">Random</span> <span class="word">Scrolling</span> <span class="word">to</span><br />
+              <span class="word">Real</span> <span class="word">Campus</span> <span class="word">Connections</span><br />
+              <span class="word">in</span> <span class="word">One</span> <span class="word">Place</span>
+            </h2>
+            <p>A social app made only for VIT Chennai, with no fake accounts and no strangers.</p>
+          </div>
+        </div>
+
+        <!-- 9. Layer L3: Accounting & 4 Hotspots -->
+        <div class="story-layer" id="storyL3">
+          <p class="story-acct" id="storyAcct">
+            Every profile carries real campus details, from batch and branch to hostel block, so you find the right people, not just any people.
+          </p>
+
+          <div class="story-hotspot" id="hs1">
+            <div class="story-hotspot-dot"></div>
+            <div class="story-hotspot-label">Verified <em>VIT email only</em></div>
+          </div>
+          <div class="story-hotspot" id="hs2">
+            <div class="story-hotspot-dot"></div>
+            <div class="story-hotspot-label">Profile <em>Batch · Branch · Hostel</em></div>
+          </div>
+          <div class="story-hotspot flip" id="hs3">
+            <div class="story-hotspot-dot"></div>
+            <div class="story-hotspot-label">Suggestions <em>92% vibe match</em></div>
+          </div>
+          <div class="story-hotspot flip" id="hs4">
+            <div class="story-hotspot-dot"></div>
+            <div class="story-hotspot-label">Connect first <em>Request, then chat</em></div>
+          </div>
+        </div>
+
+        <!-- 10. Layer L4: Station (Record, Carbon Card, Feature list) -->
+        <div class="story-layer" id="storyL4">
+          <div class="story-cred" id="storyCred">
+            <span class="chip-lime" style="margin-bottom: 12px;">✕ Your campus record</span>
+            <h2>Your achievements, on the record</h2>
+          </div>
+
+          <div class="story-carbon-card" id="storyCarbonCard">
+            <h4>Achievement score</h4>
+            <div class="story-card-note">This semester</div>
+            <div class="story-card-num"><span id="storyScoreNum">0</span><span class="unit">pts</span><span class="story-card-tag">+3 this week</span></div>
+            <svg class="story-card-sparkline" viewBox="0 0 220 70">
+              <polyline id="sparklinePoly" fill="none" stroke="#c6f35c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                        points="0,60 30,55 60,57 90,44 120,46 150,30 180,24 214,10" />
+              <g id="sparkDots" style="opacity:0">
+                <circle cx="90" cy="44" r="2.8" fill="#ffffff" />
+                <circle cx="150" cy="30" r="2.8" fill="#ffffff" />
+                <circle cx="214" cy="10" r="3.8" fill="#c6f35c" />
+              </g>
+            </svg>
+            <div class="story-card-note" style="margin-top: 8px;">Q1 · Q2 · Q3 · Q4</div>
+          </div>
+
+          <div class="story-feats" id="storyFeats">
+            <div class="story-feat-row"><span>01</span><span>Chat with files & voice notes</span><span class="story-feat-arrow">→</span></div>
+            <div class="story-feat-row"><span>02</span><span>Edit or unsend for 10 minutes</span><span class="story-feat-arrow">→</span></div>
+            <div class="story-feat-row"><span>03</span><span>Private and public groups</span><span class="story-feat-arrow">→</span></div>
+            <div class="story-feat-row"><span>04</span><span>Find a hackathon teammate</span><span class="story-feat-arrow">→</span></div>
+            <div class="story-feat-row"><span>05</span><span>Events board, study rooms, senior connect</span><span class="story-feat-arrow">→</span></div>
+          </div>
+        </div>
+
+        <!-- Progress Bar -->
+        <div class="story-prog">
+          <div class="story-prog-bar" id="storyProgBar"></div>
+        </div>
+      </div>
+      </div><!-- /story-track -->
+
+      <!-- Solutions Section (#sol) -->
+      <div class="story-sol" id="sol">
+        <div class="story-sol-head">
+          <div>
+            <span class="chip-lime">Features</span>
+            <h2 class="story-sol-title">Everything VIT students actually need</h2>
+          </div>
+          <p class="story-sol-desc">
+            Direct connections, verified student profiles, shared study rooms, and campus updates organized into one focused experience.
+          </p>
+        </div>
+
+        <div class="story-sol-grid">
+          <!-- Card 1 -->
+          <div class="story-sol-card" data-tilt>
+            <div class="story-sol-card-bg" style="background-image: url('/media/solution-chat.webp'); background-position: 22% 70%; background-size: 260%;"></div>
+            <div class="story-sol-card-overlay"></div>
+            <div class="story-sol-card-content">
+              <div class="story-sol-card-top">
+                <span>[Chat and groups]</span>
+                <div class="story-sol-card-btn">→</div>
+              </div>
+              <div>
+                <h3>Talk like it's your own place</h3>
+                <p>Private groups with friends, public groups for clubs, hostels and subjects.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card 2 -->
+          <div class="story-sol-card" data-tilt>
+            <div class="story-sol-card-bg" style="background-image: url('/media/solution-teammates.webp'); background-position: 50% 50%; background-size: 190%;"></div>
+            <div class="story-sol-card-overlay"></div>
+            <div class="story-sol-card-content">
+              <div class="story-sol-card-top">
+                <span>[Teammates and events]</span>
+                <div class="story-sol-card-btn">→</div>
+              </div>
+              <div>
+                <h3>Find your hackathon team</h3>
+                <p>Post what you need, get skill-based matches, and tap Going on campus events.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card 3 -->
+          <div class="story-sol-card" data-tilt>
+            <div class="story-sol-card-bg" style="background-image: url('/media/solution-chat.webp'); background-position: 62% 30%; background-size: 230%;"></div>
+            <div class="story-sol-card-overlay"></div>
+            <div class="story-sol-card-content">
+              <div class="story-sol-card-top">
+                <span>[Study and seniors]</span>
+                <div class="story-sol-card-btn">→</div>
+              </div>
+              <div>
+                <h3>Study rooms & senior connect</h3>
+                <p>Join exam study rooms and ask seniors about placements and projects.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 4 Count-up Stats -->
+        <div class="story-stats" id="storyStats">
+          <div class="story-stat-cell">
+            <div class="story-stat-num" data-target="100" data-suffix="%">0%</div>
+            <div class="story-stat-label">VIT-verified</div>
+          </div>
+          <div class="story-stat-cell">
+            <div class="story-stat-num" data-target="10">0</div>
+            <div class="story-stat-label">Min to unsend</div>
+          </div>
+          <div class="story-stat-cell">
+            <div class="story-stat-num" data-target="2">0</div>
+            <div class="story-stat-label">Group types</div>
+          </div>
+          <div class="story-stat-cell">
+            <div class="story-stat-num" data-target="0">0</div>
+            <div class="story-stat-label">Strangers</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =====================================================
+         PART A: 3. DRIFTBAR MEADOW FOOTER (SCOPED AS .foot-sec)
+         ===================================================== -->
+    <footer class="foot-sec" id="footer">
+      <div class="foot-stage" aria-hidden="true">
+        <video class="foot-video"
+               data-src="/media/footer.mp4"
+               poster="/media/footer-poster.webp"
+               muted loop playsinline preload="none"></video>
+      </div>
+
+      <!-- Giant Frosted-Glass Wordmark -->
+      <p class="foot-wordmark" aria-hidden="true">Campusly</p>
+
+      <div class="foot-fog" aria-hidden="true"></div>
+
+      <!-- Footer Content -->
+      <div class="foot-content">
+        <div class="foot-brand">
+          <a href="#hero" class="foot-brand-logo" aria-label="Campusly home">
+            <span class="foot-brand-mark">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3">
+                <path d="M12 21a9 9 0 0 0 9-9c0-4.97-4.03-9-9-9A9 9 0 0 0 3 12c0 1.61.42 3.12 1.16 4.44L3 21l4.74-1.12A8.95 8.95 0 0 0 12 21z"></path>
+              </svg>
+            </span>
+            Campusly
+          </a>
+
+          <h2 class="foot-brand-title">The calm place for VIT Chennai</h2>
+          <p class="foot-brand-text">
+            Campusly brings chat, groups, events, teammates, study rooms and campus notices into one calm space made only for VIT Chennai students.
+          </p>
+
+          <a href="/app.html#/signup" class="foot-brand-cta" id="footerCtaBtn" data-magnetic>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+            </svg>
+            Join with VIT email
+          </a>
+
+          <p class="foot-brand-copy">© 2026 Campusly - Made at VIT Chennai.</p>
+
+          <div class="foot-brand-by">
+            Built with <span style="color:#2563eb;">💙</span> by Campusly Team
+          </div>
+
+          <ul class="foot-status" aria-label="Campusly status">
+            <li class="foot-chip">
+              <span class="foot-chip-dot" aria-hidden="true"></span>
+              Verified VIT students
+            </li>
+            <li class="foot-chip">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 11a8 8 0 1 0-2.3 5.7" /><path d="M20 4v7h-7" /></svg>
+              Beta · v0.1
+            </li>
+            <li class="foot-chip">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m12 3 2.7 5.6 6.1.8-4.5 4.2 1.1 6-5.4-2.9-5.4 2.9 1.1-6L3.2 9.4l6.1-.8Z" /></svg>
+              Free for VIT
+            </li>
+          </ul>
+        </div>
+
+        <nav class="foot-col foot-col-menu" aria-label="Menu">
+          <h3 class="foot-col-title">Menu</h3>
+          <ul class="foot-col-list">
+            <li><a href="#sol">Features</a></li>
+            <li><a href="#sol">Groups</a></li>
+            <li><a href="#sol">Events</a></li>
+            <li><a href="#story">Achievements</a></li>
+            <li><a href="#footer">Contact</a></li>
+          </ul>
+        </nav>
+
+        <nav class="foot-col" aria-label="Essentials">
+          <h3 class="foot-col-title">Essentials</h3>
+          <ul class="foot-col-list">
+            <li><a href="#hero">Support</a></li>
+            <li><a href="#hero">Privacy notice</a></li>
+            <li><a href="#hero">Community guidelines</a></li>
+            <li><a href="#hero">Report a problem</a></li>
+          </ul>
+        </nav>
+
+        <nav class="foot-col" aria-label="From our team">
+          <h3 class="foot-col-title">From our team</h3>
+          <ul class="foot-col-list">
+            <li><a href="#hero">Campus news</a></li>
+            <li><a href="#hero">Study rooms</a></li>
+            <li><a href="#hero">Senior connect</a></li>
+            <li><a href="#hero">Lost and found</a></li>
+          </ul>
+        </nav>
+      </div>
+    </footer>
+
+    <!-- =====================================================
+         SCRIPTS: CURVED CAROUSEL + PINNED SCROLL STORY + SCRUB
+         ===================================================== -->
+    <script type="module" src="/src/landing/main.js"></script>
+  </body>
+</html>

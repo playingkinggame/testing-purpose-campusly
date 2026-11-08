@@ -1,0 +1,13 @@
+{
+  "name": "Campusly",
+  "short_name": "Campusly",
+  "description": "The calm social and chat app for VIT Chennai students.",
+  "start_url": "/app.html#/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#F5F8EF",
+  "theme_color": "#08482D",
+  "icons": [
+    { "src": "/icons/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}

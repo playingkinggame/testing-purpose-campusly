@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <script>
+      // Apply the saved theme before the page paints (prevents a white flash in dark mode).
+      (function () {
+        try {
+          var pref = localStorage.getItem('campusly-theme') || 'system';
+          var dark = pref === 'dark' || (pref === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+          document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+          document.documentElement.style.colorScheme = dark ? 'dark' : 'light';
+        } catch (e) {}
+      })();
+    </script>
+    <title>Campusly</title>
+    <meta name="description" content="Campusly: the calm social and chat app for VIT Chennai students." />
+    <meta name="theme-color" content="#08482D" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="icon" type="image/svg+xml" href="/icons/icon.svg" />
+    <link rel="apple-touch-icon" href="/icons/icon.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+    <!-- Cross-document fade when moving between the landing page and the app. -->
+    <style>
+      @view-transition { navigation: auto; }
+      @media (prefers-reduced-motion: no-preference) {
+        ::view-transition-old(root) { animation: campuslyVtOut 160ms ease both; }
+        ::view-transition-new(root) { animation: campuslyVtIn 260ms cubic-bezier(0.16, 1, 0.3, 1) both; }
+      }
+      @keyframes campuslyVtOut { to { opacity: 0; } }
+      @keyframes campuslyVtIn { from { opacity: 0; } }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

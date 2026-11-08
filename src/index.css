@@ -1,0 +1,131 @@
+@import "tailwindcss";
+
+/* ---------- Colour tokens ----------
+   Light values live here. Dark values are in the [data-theme='dark'] block below.
+   Use them as bg-cream, bg-surface, text-forest, bg-brand, etc.
+   "static" makes sure every token is always available as a CSS variable. */
+@theme static {
+  --color-cream: #F5F8EF;        /* page background */
+  --color-surface: #FFFFFF;      /* cards, inputs, menus */
+  --color-forest: #08482D;       /* text / icons / accents */
+  --color-forest-600: #0C5C3A;
+  --color-forest-900: #052E1D;
+  --color-brand: #08482D;        /* filled buttons, active tabs (white text on top) */
+  --color-brand-600: #0C5C3A;
+  --color-mint: #DAE7C7;         /* soft chips and highlights */
+  --color-mint-300: #E9F1DC;
+  --color-ink: #14231B;          /* main text */
+  --color-muted: #5B6B61;        /* secondary text */
+  --color-line: #D6E0C8;         /* borders */
+  --color-danger: #B3261E;       /* red fills (white text on top) */
+  --color-danger-ink: #B3261E;   /* red text and borders */
+  --color-danger-soft: #FDECEA;  /* soft red background */
+  --color-warn-soft: #FEF3C7;
+  --color-warn-ink: #92400E;
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Inter Tight", "Inter", ui-sans-serif, system-ui, sans-serif;
+  --radius-card: 16px;
+}
+
+:root {
+  color-scheme: light;
+  --glass-bg: rgba(255, 255, 255, 0.66);
+  --glass-border: rgba(8, 72, 45, 0.10);
+  --glass-shadow: 0 6px 24px -12px rgba(8, 72, 45, 0.25);
+}
+
+/* ---------- Dark theme ---------- */
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --color-cream: #0D1411;
+  --color-surface: #151F19;
+  --color-forest: #8EDBAF;
+  --color-forest-600: #A6E6C1;
+  --color-forest-900: #052E1D;
+  --color-brand: #1F7A4F;
+  --color-brand-600: #279060;
+  --color-mint: #1D3126;
+  --color-mint-300: #243D2F;
+  --color-ink: #E8F0EA;
+  --color-muted: #9DB0A4;
+  --color-line: #27382E;
+  --color-danger: #C2372E;
+  --color-danger-ink: #FF9D95;
+  --color-danger-soft: #3B1D1B;
+  --color-warn-soft: #3A2E12;
+  --color-warn-ink: #F3CD7A;
+  --glass-bg: rgba(21, 31, 25, 0.72);
+  --glass-border: rgba(142, 219, 175, 0.14);
+  --glass-shadow: 0 6px 24px -12px rgba(0, 0, 0, 0.7);
+}
+
+html, body, #root { height: 100%; }
+body {
+  margin: 0;
+  background: var(--color-cream);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+h1, h2, h3 { font-family: var(--font-display); letter-spacing: -0.01em; }
+
+/* Soft glass card (follows the theme) */
+.glass {
+  background: var(--glass-bg);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid var(--glass-border);
+  border-radius: 16px;
+  box-shadow: var(--glass-shadow);
+}
+
+/* Visible focus ring for keyboard users */
+:focus-visible {
+  outline: 3px solid var(--color-forest);
+  outline-offset: 2px;
+  border-radius: 8px;
+}
+
+.safe-bottom { padding-bottom: env(safe-area-inset-bottom, 0px); }
+.safe-top { padding-top: env(safe-area-inset-top, 0px); }
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}
+
+/* ---------- App motion ----------
+   Small, shared entrances for overlays. They only animate opacity/transform,
+   and the class names are opt-in so no layout or colour changes are involved. */
+@keyframes appModalIn {
+  from { opacity: 0; transform: translateY(10px) scale(0.97); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes appBackdropIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes appToastIn {
+  from { opacity: 0; transform: translateY(8px) scale(0.98); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes appPopIn {
+  from { opacity: 0; transform: translateY(-6px) scale(0.98); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes appAuthIn {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: none; }
+}
+
+.app-modal[open] { animation: appModalIn 200ms cubic-bezier(0.16, 1, 0.3, 1) both; }
+.app-modal[open]::backdrop { animation: appBackdropIn 200ms ease-out both; }
+.app-toast { animation: appToastIn 220ms cubic-bezier(0.16, 1, 0.3, 1) both; }
+.app-pop { animation: appPopIn 160ms cubic-bezier(0.16, 1, 0.3, 1) both; transform-origin: top right; }
+/* <details> menus stay mounted, so tie the entrance to the open state instead. */
+details[open] > .app-pop-menu { animation: appPopIn 160ms cubic-bezier(0.16, 1, 0.3, 1) both; transform-origin: top right; }
+.app-auth-card { animation: appAuthIn 420ms cubic-bezier(0.16, 1, 0.3, 1) both; }
+
+@media (prefers-reduced-motion: reduce) {
+  .app-modal[open], .app-modal[open]::backdrop, .app-toast, .app-pop, .app-auth-card,
+  details[open] > .app-pop-menu { animation: none; }
+}
