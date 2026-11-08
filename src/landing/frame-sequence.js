@@ -208,7 +208,12 @@ export class FrameSequence {
     const blob = this.blobs[index];
     if (!blob || this.bitmaps.has(index) || this.decoding.has(index)) return;
     this.decoding.add(index);
-    createImageBitmap(blob)
+    // colorSpaceConversion:'none' skips a per-pixel colour conversion (the frames
+    // carry no colour profile, so the picture is identical). Older browsers that
+    // reject the option fall back to the plain call.
+    const decodeBlob = () => createImageBitmap(blob, { colorSpaceConversion: 'none' })
+      .catch(() => createImageBitmap(blob));
+    decodeBlob()
       .then((bitmap) => {
         if (this.destroyed) {
           bitmap.close();

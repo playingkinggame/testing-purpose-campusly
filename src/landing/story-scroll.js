@@ -56,7 +56,9 @@ export function initStoryScroll({ onProgress } = {}) {
     suffix: el.dataset.suffix === '%' ? '%' : '',
   }));
 
-  const storyCtx = storyCanvas.getContext('2d');
+  // alpha:false = the browser can skip blending this big canvas with whatever is behind it.
+  // (The poster plate covers it until frame 0 is painted, so there is no black flash.)
+  const storyCtx = storyCanvas.getContext('2d', { alpha: false });
   if (storyCtx) {
     storyCtx.imageSmoothingEnabled = true;
     // These frames are background photography, not UI text. Low smoothing is
@@ -89,9 +91,14 @@ export function initStoryScroll({ onProgress } = {}) {
     if (Math.abs(width - canvasW) < 2 && Math.abs(height - canvasH) < 80) return;
     canvasW = width;
     canvasH = height;
+    // Drawing more pixels than the frame files contain gives no extra sharpness,
+    // it only costs GPU time (on a 1.5x screen it was ~3.6x more pixels per paint).
+    // So the canvas is capped at the frame width; the browser scales it for free.
+    const frameWidth = useSmallFrames ? 960 : 1600;
     const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
-    storyCanvas.width = width * dpr;   // resizing clears the canvas...
-    storyCanvas.height = height * dpr;
+    const scale = Math.min(dpr, frameWidth / Math.max(1, width));
+    storyCanvas.width = Math.round(width * scale);   // resizing clears the canvas...
+    storyCanvas.height = Math.round(height * scale);
     sequence.draw(storyCtx, wantPosition); // ...so paint the current frame back
   }
 
@@ -277,8 +284,15 @@ export function initStoryScroll({ onProgress } = {}) {
 
     // Progress is a pure function of scroll position and cached measurements.
     const rawP = readProgress();
-    sp += (rawP - sp) * (1 - Math.exp(-dt * 12));
-    if (Math.abs(rawP - sp) < 0.0002) sp = rawP;
+    if (document.documentElement.classList.contains('lenis')) {
+      // Lenis already glides the scroll position. Smoothing it a second time
+      // only added ~100ms of "floaty" delay between your wheel and the screen.
+      sp = rawP;
+    } else {
+      // Touch / native scrolling: a very light filter (about 45ms) hides event jitter.
+      sp += (rawP - sp) * (1 - Math.exp(-dt * 22));
+      if (Math.abs(rawP - sp) < 0.0002) sp = rawP;
+    }
 
     // Pointer parallax, damped with a time constant instead of 0.06 per frame.
     if (reduceMotion) {

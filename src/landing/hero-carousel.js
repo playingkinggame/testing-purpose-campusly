@@ -57,7 +57,7 @@ export function initHeroCarousel() {
       </div>
     `;
     if (card !== firstCard) carouselWrap.appendChild(card);
-    cards.push({ el: card, index: i, focus: false });
+    cards.push({ el: card, index: i, focus: false, near: false });
   }
 
   // Responsive scale: one source of truth for CSS (--u) and the JS carousel maths.
@@ -103,7 +103,11 @@ export function initHeroCarousel() {
 
   const syncVideos = () => {
     heroVideos.forEach((video) => {
-      if (heroVisible && !document.hidden && !pageScrolling && onScreen.get(video)) playVideo(video);
+      // Ten cards share the same reel, and every <video> is its own decoder. Only the
+      // cards near the middle (where you actually look) play; the edges keep the poster.
+      const card = video.closest('.hero-card');
+      const near = !card || card.classList.contains('is-near');
+      if (heroVisible && !document.hidden && !pageScrolling && onScreen.get(video) && near) playVideo(video);
       else video.pause();
     });
   };
@@ -172,6 +176,7 @@ export function initHeroCarousel() {
       scrollOffset += (baseSpeed + velocity) * dt;
     }
 
+    let nearChanged = false;
     cards.forEach((c) => {
       let unpushedOffset = ((c.index * 196 - scrollOffset) % totalWidth + totalWidth) % totalWidth;
       if (unpushedOffset > totalWidth / 2) unpushedOffset -= totalWidth;
@@ -214,8 +219,16 @@ export function initHeroCarousel() {
         c.focus = focus;
         c.el.classList.toggle('is-focus', focus);
       }
+
+      const near = d < 0.56;
+      if (near !== c.near) {
+        c.near = near;
+        c.el.classList.toggle('is-near', near);
+        nearChanged = true;
+      }
     });
     needsRender = false;
+    if (nearChanged) syncVideos(); // start/stop the right decoders as cards drift past
   }
 
   // The gentle idle drift only needs 30fps; drags still run at display refresh.
